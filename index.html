@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spin Wheels - Giveaway Picker | Ritual Testnet</title>
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Open Graph / Social Cards with default Ritual Logo -->
+  <meta property="og:title" content="Spin Wheels - Giveaway Picker | Ritual Testnet">
+  <meta property="og:description" content="Spin the wheel on Ritual Testnet to pick giveaway winners fairly. Paid in RITUAL tokens.">
+  <meta property="og:image" content="logo.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Spin Wheels - Giveaway Picker | Ritual Testnet">
+  <meta name="twitter:description" content="Spin the wheel on Ritual Testnet to pick giveaway winners fairly. Paid in RITUAL tokens.">
+  <meta name="twitter:image" content="logo.png">
+</head>
+<body>
+  <!-- Body Background Overlay for uploads -->
+  <div id="body-bg-overlay"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="logo-container">
+      <img src="logo.png" alt="Ritual Logo" class="logo-img" id="logo-website">
+      <div>
+        <h1>Spin Wheels</h1>
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 2px;">
+          <span class="ritual-badge">Ritual Testnet</span>
+          <span style="font-size: 0.75rem; color: var(--text-secondary);">Giveaway Picker</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Wallet Widget -->
+    <div class="wallet-widget">
+      <div class="wallet-info" id="wallet-info" style="display: none;">
+        <span class="wallet-address" id="wallet-address-display">0x000...000</span>
+        <span class="wallet-balance" id="wallet-balance-display">0.00 RITUAL</span>
+      </div>
+      <button class="wallet-btn" id="connect-wallet-btn">
+        <i data-lucide="wallet"></i>
+        <span id="connect-btn-text">Connect Wallet</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main>
+    <!-- Left Section: Spin Wheel Canvas -->
+    <section class="wheel-section">
+      <div class="wheel-wrapper">
+        <!-- Pointer/Needle -->
+        <div class="wheel-pointer" id="wheel-pointer">
+          <svg class="wheel-pointer-svg" viewBox="0 0 100 100" width="100%" height="100%">
+            <polygon points="50,90 20,25 50,40 80,25" />
+            <circle cx="50" cy="25" r="10" fill="#ffffff" />
+          </svg>
+        </div>
+        
+        <!-- Canvas Container -->
+        <div class="canvas-container">
+          <canvas id="wheel-canvas"></canvas>
+        </div>
+        
+        <!-- Center Spin Button -->
+        <button class="spin-center-btn" id="spin-btn">
+          <span>SPIN</span>
+          <span class="btn-subtext" id="spin-btn-fee">0.01 RITUAL</span>
+        </button>
+      </div>
+
+      <!-- Quick Control Panel -->
+      <div class="wheel-controls">
+        <button class="btn-secondary" id="quick-reset-btn">
+          <i data-lucide="rotate-ccw"></i>
+          Reset Wheel
+        </button>
+        <button class="btn-secondary" id="quick-shuffle-btn">
+          <i data-lucide="shuffle"></i>
+          Shuffle Items
+        </button>
+      </div>
+    </section>
+
+    <!-- Right Section: Settings and Lists -->
+    <section class="config-section glass-panel">
+      <!-- Tabs Selector -->
+      <div class="tabs-header">
+        <button class="tab-link active" data-tab="entries-tab">
+          <i data-lucide="list" style="vertical-align: middle; margin-right: 4px; width: 16px; height: 16px;"></i>
+          Entries
+        </button>
+        <button class="tab-link" data-tab="winners-tab">
+          <i data-lucide="trophy" style="vertical-align: middle; margin-right: 4px; width: 16px; height: 16px;"></i>
+          Winners
+        </button>
+        <button class="tab-link" data-tab="custom-tab">
+          <i data-lucide="settings" style="vertical-align: middle; margin-right: 4px; width: 16px; height: 16px;"></i>
+          Customize
+        </button>
+      </div>
+
+      <!-- Tabs Content -->
+      <div class="tabs-content">
+        <!-- Entries Tab -->
+        <div class="tab-pane active" id="entries-tab">
+          <div class="form-group">
+            <label for="entries-textarea">Wheel Segments (One per line)</label>
+            <textarea id="entries-textarea" class="form-control" placeholder="Enter names or items to spin...&#10;Alice&#10;Bob&#10;Charlie&#10;David&#10;Emma"></textarea>
+            <div class="input-helper">Add at least 2 entries. Duplicate names are allowed.</div>
+          </div>
+          <button class="btn-primary-action" id="update-wheel-btn">
+            <i data-lucide="check-circle-2"></i>
+            Update Wheel Entries
+          </button>
+        </div>
+
+        <!-- Winners Tab -->
+        <div class="tab-pane" id="winners-tab">
+          <div class="winners-list-wrapper">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">History</span>
+              <button class="btn-secondary" id="clear-winners-btn" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                Clear All
+              </button>
+            </div>
+            
+            <div class="winners-list" id="winners-list-container">
+              <!-- Dynamically populated or empty state -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Customization Tab -->
+        <div class="tab-pane" id="custom-tab">
+          <!-- Upload Logo -->
+          <div class="form-group">
+            <label>Wheel Center Logo</label>
+            <div class="upload-box">
+              <i data-lucide="image" class="upload-icon" style="width: 32px; height: 32px;"></i>
+              <span class="upload-text">Drag & drop or click to upload PNG/JPG</span>
+              <input type="file" id="logo-uploader" accept="image/*">
+            </div>
+            <div class="upload-preview-container" id="logo-preview-box" style="display: none;">
+              <img src="" id="logo-preview-img" class="upload-preview" alt="Logo preview">
+              <span style="font-size: 0.85rem;" id="logo-file-name">filename.png</span>
+              <button class="remove-upload-btn" id="remove-logo-btn">
+                <i data-lucide="x"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Upload Background -->
+          <div class="form-group">
+            <label>Website Background</label>
+            <div class="upload-box">
+              <i data-lucide="bg" class="upload-icon" style="width: 32px; height: 32px;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg></i>
+              <span class="upload-text">Drag & drop or click to upload background image</span>
+              <input type="file" id="bg-uploader" accept="image/*">
+            </div>
+            <div class="upload-preview-container" id="bg-preview-box" style="display: none;">
+              <img src="" id="bg-preview-img" class="upload-preview" alt="BG preview">
+              <span style="font-size: 0.85rem;" id="bg-file-name">filename.jpg</span>
+              <button class="remove-upload-btn" id="remove-bg-btn">
+                <i data-lucide="x"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Segment Colors -->
+          <div class="form-group">
+            <label>Segment Colors Palette</label>
+            <div class="styling-grid">
+              <div class="color-picker-group">
+                <input type="color" id="color-picker-1" class="color-picker-input" value="#8b5cf6">
+                <span style="font-size: 0.8rem;">Color A</span>
+              </div>
+              <div class="color-picker-group">
+                <input type="color" id="color-picker-2" class="color-picker-input" value="#ec4899">
+                <span style="font-size: 0.8rem;">Color B</span>
+              </div>
+              <div class="color-picker-group">
+                <input type="color" id="color-picker-3" class="color-picker-input" value="#3b82f6">
+                <span style="font-size: 0.8rem;">Color C</span>
+              </div>
+              <div class="color-picker-group">
+                <input type="color" id="color-picker-4" class="color-picker-input" value="#10b981">
+                <span style="font-size: 0.8rem;">Color D</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fee Configurations -->
+          <div class="fee-config-box">
+            <div class="fee-display">
+              <span>Spin Fee</span>
+              <span class="fee-amount" id="fee-amount-display">0.01 RITUAL</span>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="fee-input" style="font-size: 0.75rem;">Adjust Spin Fee (RITUAL)</label>
+              <input type="number" id="fee-input" step="0.01" min="0" value="0.01" style="width: 100%; padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: white; border-radius: 4px; outline: none;">
+            </div>
+            <div class="form-group" style="margin-top: 0.75rem; margin-bottom: 0;">
+              <label style="font-size: 0.75rem;">Fee Recipient Address</label>
+              <input type="text" id="recipient-input" value="0x6143ae4131f918589f5a0c850da23a33b9d00284" readonly style="width: 100%; padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 4px; outline: none; font-size: 0.75rem; font-family: monospace;">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>Spin Wheels - Giveaway Picker | Ritual Testnet. Built with love by Raka &copy; 2026</p>
+    <p style="margin-top: 0.5rem; font-size: 0.75rem;">
+      Connect your wallet, pay the spin fee on Ritual Testnet (Chain ID 1979), and claim your giveaway!
+    </p>
+  </footer>
+
+  <!-- MODALS -->
+
+  <!-- 1. Transaction Processing Modal -->
+  <div class="modal-overlay" id="tx-modal">
+    <div class="modal-card glass-panel">
+      <div class="loader-spinner"></div>
+      <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;" id="tx-modal-title">Processing Spin Request</h3>
+      <p style="color: var(--text-secondary); font-size: 0.9rem;" id="tx-modal-desc">Please check your wallet and confirm the spin fee transaction.</p>
+      
+      <div class="loading-steps">
+        <div class="step-item active" id="step-wallet">
+          <span class="step-bullet"></span>
+          <span>Approve transaction in Wallet</span>
+        </div>
+        <div class="step-item" id="step-chain">
+          <span class="step-bullet"></span>
+          <span>Waiting for Block Confirmation</span>
+        </div>
+        <div class="step-item" id="step-spin">
+          <span class="step-bullet"></span>
+          <span>Preparing to Spin the Wheel</span>
+        </div>
+      </div>
+      <div id="tx-hash-box" style="margin-top: 1.5rem; font-size: 0.8rem; display: none;">
+        <span style="color: var(--text-muted);">Tx Hash: </span>
+        <a href="" id="tx-link" target="_blank" class="winner-tx-link" style="display: inline-flex; word-break: break-all; margin-left: 4px;">0x...</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Winner Reveal Modal -->
+  <div class="modal-overlay" id="winner-modal">
+    <div class="modal-card glass-panel">
+      <button class="modal-close" id="close-winner-modal-btn">
+        <i data-lucide="x" style="width: 24px; height: 24px;"></i>
+      </button>
+      <div class="winner-modal-icon">🎉</div>
+      <div class="winner-modal-title">WE HAVE A WINNER!</div>
+      <div class="winner-modal-name" id="winner-reveal-name">Alice</div>
+      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;" id="winner-modal-desc">
+        Congratulations! The wheel has selected this entry.
+      </p>
+      
+      <!-- Optional removal checkmark -->
+      <div id="remove-winner-container" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 2rem; background: rgba(255, 255, 255, 0.03); padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05);">
+        <input type="checkbox" id="remove-winner-checkbox" checked style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent-primary);">
+        <label for="remove-winner-checkbox" style="font-size: 0.85rem; color: var(--text-primary); cursor: pointer; user-select: none;">
+          Remove this winner from entries list
+        </label>
+      </div>
+
+      <!-- Action Buttons -->
+      <div id="winner-modal-buttons" style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%;">
+        <div style="display: flex; gap: 0.75rem; width: 100%;">
+          <button class="btn-primary-action" id="winner-dismiss-btn" style="flex: 1;">
+            <i data-lucide="check-circle-2"></i>
+            Awesome!
+          </button>
+          <button class="btn-secondary" id="winner-screenshot-btn" style="flex: 1; justify-content: center; border-color: var(--accent-primary); background: rgba(139, 92, 246, 0.1); color: white; display: flex; align-items: center; gap: 0.5rem; font-family: inherit; font-size: 0.9rem;">
+            <i data-lucide="camera" style="width: 18px; height: 18px;"></i>
+            Download Card
+          </button>
+        </div>
+        <a href="#" target="_blank" class="btn-secondary" id="winner-share-twitter-btn" style="justify-content: center; text-decoration: none; border-color: rgba(29, 161, 242, 0.4); background: rgba(29, 161, 242, 0.05); color: #1da1f2; font-family: inherit; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; width: 100%;">
+          <i data-lucide="twitter" style="width: 18px; height: 18px; fill: #1da1f2;"></i>
+          Share on X
+        </a>
+      </div>
+
+      <div id="winner-generator-watermark" style="font-size: 0.7rem; color: var(--text-muted); margin-top: 1.25rem; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 0.75rem;">
+        Ritual Spin Generator &bull; verified on explorer.ritualfoundation.org
+      </div>
+    </div>
+  </div>
+
+  <!-- Javascript Dependencies -->
+  <!-- Ethers.js v6 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- html2canvas for screenshots -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  
+  <!-- App Custom Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
